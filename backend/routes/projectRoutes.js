@@ -1,0 +1,233 @@
+const express = require("express");
+
+const router = express.Router();
+
+const multer = require("multer");
+
+const XLSX = require("xlsx");
+
+const Project =
+  require("../models/Project");
+
+const authMiddleware =
+require("../middleware/authMiddleware");
+
+const {
+
+  getProjects,
+
+  createProject,
+
+  deleteProject,
+
+  getCompletedProjects,
+
+  getDeletedProjects,
+
+  markCompleted,
+
+} = require(
+  "../controllers/projectController"
+);
+/* =========================
+   Multer Storage
+========================= */
+
+const storage =
+  multer.memoryStorage();
+
+const upload = multer({
+  storage,
+});
+
+/* =========================
+   GET PROJECTS
+========================= */
+
+router.get(
+  "/",
+  authMiddleware,
+  getProjects
+);
+
+/* =========================
+   CREATE PROJECT
+========================= */
+
+router.post(
+  "/",
+  authMiddleware,
+  createProject
+);
+
+
+
+
+
+
+/* =========================
+   COMPLETED PROJECTS
+========================= */
+
+router.get(
+  "/completed",
+  authMiddleware,
+  getCompletedProjects
+);
+
+/* =========================
+   MARK COMPLETED
+========================= */
+
+router.put(
+  "/complete/:id",
+  authMiddleware,
+  markCompleted
+);
+/* =========================
+   DELETED PROJECTS
+========================= */
+router.get(
+  "/deleted",
+  authMiddleware,
+  getDeletedProjects
+);
+
+router.put(
+  "/delete/:id",
+  authMiddleware,
+  deleteProject
+)
+/* =========================
+   UPDATE PROJECT
+========================= */
+router.put(
+  "/:id",
+  authMiddleware,
+  async (req, res) => {
+
+    try {
+
+      const updated =
+        await Project.findByIdAndUpdate(
+
+          req.params.id,
+
+          req.body,
+
+          {
+            new: true,
+          }
+        );
+
+      res.status(200).json(
+        updated
+      );
+
+    }
+
+    catch (error) {
+
+      res.status(500).json({
+        message:
+          error.message,
+      });
+
+    }
+  }
+);
+
+/* =========================
+   EXCEL UPLOAD
+========================= */
+
+router.post(
+  "/upload",
+  authMiddleware,
+  upload.single("file"),
+
+  async (req, res) => {
+
+    try {
+
+      const workbook =
+        XLSX.read(
+          req.file.buffer,
+          {
+            type: "buffer",
+          }
+        );
+
+      const sheet =
+        workbook.Sheets[
+          workbook.SheetNames[0]
+        ];
+
+      const data =
+        XLSX.utils.sheet_to_json(
+          sheet
+        );
+
+      /* Format Excel Rows */
+
+      const formatted =
+        data.map((row) => ({
+
+          project_name:
+            row.project_name ||
+            row.Project ||
+            "Unnamed Project",
+
+          category:
+            row.category ||
+            row.Category ||
+            "NA",
+
+          status:
+            row.status ||
+            row.Status ||
+            "Pending",
+
+          project_owner:
+            row.project_owner ||
+            row.Owner ||
+            "Not Assigned",
+
+          start_date:
+            row.start_date ||
+            row.Start_Date ||
+            "",
+
+          end_date:
+            row.end_date ||
+            row.End_Date ||
+            "",
+        }));
+
+      await Project.insertMany(
+        formatted
+      );
+
+      res.status(200).json({
+
+        message:
+          "Excel uploaded successfully",
+
+        count:
+          formatted.length,
+      });
+
+    }
+
+    catch (error) {
+
+      res.status(500).json({
+        message:
+          error.message,
+      });
+
+    }
+  }
+);
+
+module.exports = router;

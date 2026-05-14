@@ -10,25 +10,12 @@ import {
   useState,
 } from "react";
 
-import {
-  groupStatus,
-} from "@/types/project";
-
-/* =========================
-   KPI CARD
-========================= */
-
 const KPICard = ({
   title,
   value,
   icon: Icon,
   color,
-}: {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  color: string;
-}) => (
+}: any) => (
 
   <div className="kpi-card">
 
@@ -67,19 +54,11 @@ const KPICard = ({
   </div>
 );
 
-/* =========================
-   DASHBOARD KPI
-========================= */
-
 export const DashboardKPICards =
   () => {
 
     const [projects, setProjects] =
       useState<any[]>([]);
-
-    /* =========================
-       FETCH PROJECTS
-    ========================= */
 
     useEffect(() => {
 
@@ -97,7 +76,7 @@ export const DashboardKPICards =
               "token"
             );
 
-          const res =
+          const response =
             await fetch(
 
               `${import.meta.env.VITE_API_URL}/api/projects`,
@@ -111,9 +90,17 @@ export const DashboardKPICards =
             );
 
           const data =
-            await res.json();
+            await response.json();
 
-          setProjects(data);
+          if (Array.isArray(data)) {
+
+            setProjects(data);
+
+          } else {
+
+            setProjects([]);
+
+          }
 
         }
 
@@ -121,38 +108,42 @@ export const DashboardKPICards =
 
           console.log(error);
 
+          setProjects([]);
+
         }
       };
 
-    /* =========================
-       KPI COUNTS
-    ========================= */
-
     const totalProjects =
-      projects.length || 0;
+      projects.length;
 
     const completed =
       projects.filter(
-        (p: any) =>
-          groupStatus(
-            p.status
-          ) === "Completed"
+        (p) =>
+          p.status
+            ?.toLowerCase()
+            .includes(
+              "completed"
+            )
       ).length;
 
     const ongoing =
       projects.filter(
-        (p: any) =>
-          groupStatus(
-            p.status
-          ) === "Ongoing"
+        (p) =>
+          p.status
+            ?.toLowerCase()
+            .includes(
+              "ongoing"
+            )
       ).length;
 
     const onHold =
       projects.filter(
-        (p: any) =>
-          groupStatus(
-            p.status
-          ) === "On Hold"
+        (p) =>
+          p.status
+            ?.toLowerCase()
+            .includes(
+              "hold"
+            )
       ).length;
 
     return (
@@ -182,8 +173,8 @@ export const DashboardKPICards =
           value={completed}
           icon={CheckCircle2}
           color="
-            bg-success/10
-            text-success
+            bg-green-100
+            text-green-600
           "
         />
 
@@ -192,8 +183,8 @@ export const DashboardKPICards =
           value={ongoing}
           icon={Clock}
           color="
-            bg-info/10
-            text-info
+            bg-blue-100
+            text-blue-600
           "
         />
 
@@ -202,8 +193,8 @@ export const DashboardKPICards =
           value={onHold}
           icon={Pause}
           color="
-            bg-warning/10
-            text-warning
+            bg-yellow-100
+            text-yellow-600
           "
         />
 

@@ -1,265 +1,488 @@
 import { useMemo, useState, useEffect } from "react";
+
 import {
-  PieChart, Pie, Cell,
-  BarChart, Bar,
-  XAxis, YAxis, Tooltip,
-  ResponsiveContainer, Legend
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from "recharts";
 
-import { useProjectData } from "@/contexts/ProjectContext";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
-import { groupStatus, STATUS_GROUP_COLORS } from "@/types/project";
+
+import {
+  groupStatus,
+  STATUS_GROUP_COLORS,
+} from "@/types/project";
 
 export const DashboardCharts = () => {
-  const { projects: excelProjects } = useProjectData();
 
-  const [projects, setProjects] = useState<any[]>([]);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [projects, setProjects] =
+    useState<any[]>([]);
 
-  // LOAD DATA
+  const [statusFilter, setStatusFilter] =
+    useState("all");
+
+  const [dateFrom, setDateFrom] =
+    useState("");
+
+  const [dateTo, setDateTo] =
+    useState("");
+
+  /* =========================
+     FETCH PROJECTS FROM DB
+  ========================= */
+
   useEffect(() => {
-    const stored = localStorage.getItem("projects");
-    if (stored) {
-      setProjects(JSON.parse(stored));
-    } else {
-      setProjects(excelProjects);
-      localStorage.setItem("projects", JSON.stringify(excelProjects));
-    }
-  }, [excelProjects]);
 
-  // FILTER
+    fetchProjects();
+
+  }, []);
+
+  const fetchProjects = async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+
+        `${import.meta.env.VITE_API_URL}/api/projects`,
+
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data =
+        await res.json();
+
+      setProjects(data);
+
+    }
+
+    catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  /* =========================
+     FILTER
+  ========================= */
+
   const filtered = useMemo(() => {
+
     let result = [...projects];
 
     if (statusFilter !== "all") {
+
       result = result.filter(
-        (p) => groupStatus(p.status) === statusFilter
+
+        (p) =>
+          groupStatus(p.status) ===
+          statusFilter
       );
     }
 
     if (dateFrom) {
+
       result = result.filter(
-        (p) => p.start_date && p.start_date >= dateFrom
+
+        (p) =>
+          p.start_date &&
+          p.start_date >= dateFrom
       );
     }
 
     if (dateTo) {
+
       result = result.filter(
-        (p) => p.end_date && p.end_date <= dateTo
+
+        (p) =>
+          p.end_date &&
+          p.end_date <= dateTo
       );
     }
 
     return result;
-  }, [projects, statusFilter, dateFrom, dateTo]);
 
-  // STATUS PIE
+  }, [
+    projects,
+    statusFilter,
+    dateFrom,
+    dateTo,
+  ]);
+
+  /* =========================
+     STATUS PIE
+  ========================= */
+
   const statusData = useMemo(() => {
+
     const counts: any = {};
+
     filtered.forEach((p) => {
-      const g = groupStatus(p.status);
-      counts[g] = (counts[g] || 0) + 1;
+
+      const g =
+        groupStatus(p.status);
+
+      counts[g] =
+        (counts[g] || 0) + 1;
     });
 
-    return Object.entries(counts).map(([name, value]) => ({
-      name,
-      value,
-      fill: STATUS_GROUP_COLORS[name] || "#8884d8",
-    }));
+    return Object.entries(counts).map(
+
+      ([name, value]) => ({
+
+        name,
+
+        value,
+
+        fill:
+          STATUS_GROUP_COLORS[
+            name
+          ] || "#8884d8",
+      })
+    );
+
   }, [filtered]);
 
-  // OWNER BAR
+  /* =========================
+     OWNER BAR
+  ========================= */
+
   const ownerData = useMemo(() => {
+
     const counts: any = {};
+
     filtered.forEach((p: any) => {
-      const owner = p.project_owner || "Unassigned";
-      counts[owner] = (counts[owner] || 0) + 1;
+
+      const owner =
+        p.project_owner ||
+        "Unassigned";
+
+      counts[owner] =
+        (counts[owner] || 0) + 1;
     });
 
     return Object.entries(counts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a: any, b: any) => b.count - a.count)
+
+      .map(([name, count]) => ({
+        name,
+        count,
+      }))
+
+      .sort(
+        (a: any, b: any) =>
+          b.count - a.count
+      )
+
       .slice(0, 10);
+
   }, [filtered]);
 
-  // CATEGORY PIE
+  /* =========================
+     CATEGORY PIE
+  ========================= */
+
   const categoryData = useMemo(() => {
+
     const counts: any = {};
+
     filtered.forEach((p: any) => {
-      const cat = p.category || "Unknown";
-      counts[cat] = (counts[cat] || 0) + 1;
+
+      const cat =
+        p.category || "Unknown";
+
+      counts[cat] =
+        (counts[cat] || 0) + 1;
     });
 
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    return Object.entries(counts).map(
+
+      ([name, value]) => ({
+        name,
+        value,
+      })
+    );
+
   }, [filtered]);
 
-  // MARKET BAR
+  /* =========================
+     MARKET BAR
+  ========================= */
+
   const marketData = useMemo(() => {
+
     const counts: any = {};
+
     filtered.forEach((p: any) => {
-      const market = p.market_segment || "Unknown";
-      counts[market] = (counts[market] || 0) + 1;
+
+      const market =
+        p.market_segment ||
+        "Unknown";
+
+      counts[market] =
+        (counts[market] || 0) + 1;
     });
 
     return Object.entries(counts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a: any, b: any) => b.count - a.count);
+
+      .map(([name, count]) => ({
+        name,
+        count,
+      }))
+
+      .sort(
+        (a: any, b: any) =>
+          b.count - a.count
+      );
+
   }, [filtered]);
 
-  // BUSINESS PIE
+  /* =========================
+     BUSINESS PIE
+  ========================= */
+
   const businessData = useMemo(() => {
+
     const counts: any = {};
+
     filtered.forEach((p: any) => {
-      const type = p.business_opportunity || "NA";
-      counts[type] = (counts[type] || 0) + 1;
+
+      const type =
+        p.business_opportunity ||
+        "NA";
+
+      counts[type] =
+        (counts[type] || 0) + 1;
     });
 
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    return Object.entries(counts).map(
+
+      ([name, value]) => ({
+        name,
+        value,
+      })
+    );
+
   }, [filtered]);
 
-  // OVERALL STATUS PIE
+  /* =========================
+     OVERALL STATUS PIE
+  ========================= */
+
   const overallStatusData = useMemo(() => {
+
     const counts: any = {};
+
     filtered.forEach((p: any) => {
-      const status = groupStatus(p.status);
-      counts[status] = (counts[status] || 0) + 1;
+
+      const status =
+        groupStatus(p.status);
+
+      counts[status] =
+        (counts[status] || 0) + 1;
     });
 
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    return Object.entries(counts).map(
+
+      ([name, value]) => ({
+        name,
+        value,
+      })
+    );
+
   }, [filtered]);
 
   return (
+
     <div className="space-y-6">
 
       {/* FILTERS */}
+
       <div className="chart-container">
+
         <h3>Filters</h3>
 
         <div className="grid grid-cols-3 gap-4">
 
           <div>
+
             <Label>Status</Label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+
+            <Select
+              value={statusFilter}
+              onValueChange={
+                setStatusFilter
+              }
+            >
+
+              <SelectTrigger>
+
+                <SelectValue />
+
+              </SelectTrigger>
+
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="Ongoing">Ongoing</SelectItem>
-                <SelectItem value="On Hold">On Hold</SelectItem>
+
+                <SelectItem value="all">
+                  All
+                </SelectItem>
+
+                <SelectItem value="Completed">
+                  Completed
+                </SelectItem>
+
+                <SelectItem value="Ongoing">
+                  Ongoing
+                </SelectItem>
+
+                <SelectItem value="On Hold">
+                  On Hold
+                </SelectItem>
+
               </SelectContent>
+
             </Select>
+
           </div>
 
           <div>
+
             <Label>From</Label>
-            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) =>
+                setDateFrom(
+                  e.target.value
+                )
+              }
+            />
+
           </div>
 
           <div>
+
             <Label>To</Label>
-            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) =>
+                setDateTo(
+                  e.target.value
+                )
+              }
+            />
+
           </div>
 
         </div>
+
       </div>
 
       {/* CHARTS */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* STATUS */}
+
         <div className="chart-container">
+
           <h3>Status Distribution</h3>
+
           <ResponsiveContainer height={280}>
+
             <PieChart>
-              <Pie data={statusData} dataKey="value" innerRadius={60}>
-                {statusData.map((e, i) => (
-                  <Cell key={i} fill={e.fill} />
-                ))}
+
+              <Pie
+                data={statusData}
+                dataKey="value"
+                innerRadius={60}
+              >
+
+                {statusData.map(
+                  (e, i) => (
+
+                    <Cell
+                      key={i}
+                      fill={e.fill}
+                    />
+                  )
+                )}
+
               </Pie>
+
               <Tooltip />
+
               <Legend />
+
             </PieChart>
+
           </ResponsiveContainer>
+
         </div>
 
         {/* OWNER */}
+
         <div className="chart-container">
+
           <h3>Projects per Owner</h3>
+
           <ResponsiveContainer height={280}>
-            <BarChart data={ownerData} layout="vertical">
+
+            <BarChart
+              data={ownerData}
+              layout="vertical"
+            >
+
               <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={120} />
+
+              <YAxis
+                dataKey="name"
+                type="category"
+                width={120}
+              />
+
               <Tooltip />
-              <Bar dataKey="count" fill="#3b82f6" />
+
+              <Bar
+                dataKey="count"
+                fill="#3b82f6"
+              />
+
             </BarChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* CATEGORY */}
-        <div className="chart-container">
-          <h3>Project Category</h3>
-          <ResponsiveContainer height={280}>
-            <PieChart>
-              <Pie data={categoryData} dataKey="value">
-                {categoryData.map((_, i) => (
-                  <Cell key={i} fill={["#3b82f6","#f97316","#a855f7","#22c55e"][i % 4]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
           </ResponsiveContainer>
-        </div>
 
-        {/* MARKET */}
-        <div className="chart-container">
-          <h3>Market Segment</h3>
-          <ResponsiveContainer height={280}>
-            <BarChart data={marketData} layout="vertical">
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={150} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#f97316" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* BUSINESS */}
-        <div className="chart-container">
-          <h3>Business Opportunity</h3>
-          <ResponsiveContainer height={280}>
-            <PieChart>
-              <Pie data={businessData} dataKey="value" innerRadius={60}>
-                {businessData.map((_, i) => (
-                  <Cell key={i} fill={["#3b82f6","#1e40af","#f97316","#ec4899"][i % 4]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* OVERALL */}
-        <div className="chart-container">
-          <h3>Overall Status</h3>
-          <ResponsiveContainer height={280}>
-            <PieChart>
-              <Pie data={overallStatusData} dataKey="value" innerRadius={60}>
-                {overallStatusData.map((_, i) => (
-                  <Cell key={i} fill={["#22c55e","#3b82f6","#f97316","#a855f7"][i % 4]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
         </div>
 
       </div>
+
     </div>
   );
 };

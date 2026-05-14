@@ -1,39 +1,212 @@
-import { TrendingUp, FolderKanban, CheckCircle2, Clock, Pause } from 'lucide-react';
-import { useProjectData } from "@/contexts/ProjectContext";
-import { groupStatus } from '@/types/project';
+import {
+  FolderKanban,
+  CheckCircle2,
+  Clock,
+  Pause,
+} from "lucide-react";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  groupStatus,
+} from "@/types/project";
+
+/* =========================
+   KPI CARD
+========================= */
 
 const KPICard = ({
-  title, value, icon: Icon, color,
+  title,
+  value,
+  icon: Icon,
+  color,
 }: {
-  title: string; value: string | number; icon: React.ElementType; color: string;
+  title: string;
+  value: string | number;
+  icon: React.ElementType;
+  color: string;
 }) => (
+
   <div className="kpi-card">
+
     <div className="flex items-start justify-between">
+
       <div>
-        <p className="text-sm text-muted-foreground">{title}</p>
-        <p className="text-3xl font-bold">{value}</p>
+
+        <p className="text-sm text-muted-foreground">
+          {title}
+        </p>
+
+        <p className="text-3xl font-bold">
+          {value}
+        </p>
+
       </div>
-      <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${color}`}>
+
+      <div
+        className={`
+          h-12
+          w-12
+          rounded-xl
+          flex
+          items-center
+          justify-center
+          ${color}
+        `}
+      >
+
         <Icon className="h-6 w-6" />
+
       </div>
+
     </div>
+
   </div>
 );
 
-export const DashboardKPICards = () => {
-  const { projects } = useProjectData();
+/* =========================
+   DASHBOARD KPI
+========================= */
 
-  const totalProjects = projects.length || 0;
-  const completed = projects.filter((p: any) => groupStatus(p.status) === 'Completed').length;
-  const ongoing = projects.filter((p: any) => groupStatus(p.status) === 'Ongoing').length;
-  const onHold = projects.filter((p: any) => groupStatus(p.status) === 'On Hold').length;
+export const DashboardKPICards =
+  () => {
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <KPICard title="Total Projects" value={totalProjects} icon={FolderKanban} color="bg-primary/10 text-primary" />
-      <KPICard title="Completed" value={completed} icon={CheckCircle2} color="bg-success/10 text-success" />
-      <KPICard title="Ongoing" value={ongoing} icon={Clock} color="bg-info/10 text-info" />
-      <KPICard title="On Hold" value={onHold} icon={Pause} color="bg-warning/10 text-warning" />
-    </div>
-  );
-};
+    const [projects, setProjects] =
+      useState<any[]>([]);
+
+    /* =========================
+       FETCH PROJECTS
+    ========================= */
+
+    useEffect(() => {
+
+      fetchProjects();
+
+    }, []);
+
+    const fetchProjects =
+      async () => {
+
+        try {
+
+          const token =
+            localStorage.getItem(
+              "token"
+            );
+
+          const res =
+            await fetch(
+
+              `${import.meta.env.VITE_API_URL}/api/projects`,
+
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            );
+
+          const data =
+            await res.json();
+
+          setProjects(data);
+
+        }
+
+        catch (error) {
+
+          console.log(error);
+
+        }
+      };
+
+    /* =========================
+       KPI COUNTS
+    ========================= */
+
+    const totalProjects =
+      projects.length || 0;
+
+    const completed =
+      projects.filter(
+        (p: any) =>
+          groupStatus(
+            p.status
+          ) === "Completed"
+      ).length;
+
+    const ongoing =
+      projects.filter(
+        (p: any) =>
+          groupStatus(
+            p.status
+          ) === "Ongoing"
+      ).length;
+
+    const onHold =
+      projects.filter(
+        (p: any) =>
+          groupStatus(
+            p.status
+          ) === "On Hold"
+      ).length;
+
+    return (
+
+      <div
+        className="
+          grid
+          grid-cols-1
+          sm:grid-cols-2
+          lg:grid-cols-4
+          gap-4
+        "
+      >
+
+        <KPICard
+          title="Total Projects"
+          value={totalProjects}
+          icon={FolderKanban}
+          color="
+            bg-primary/10
+            text-primary
+          "
+        />
+
+        <KPICard
+          title="Completed"
+          value={completed}
+          icon={CheckCircle2}
+          color="
+            bg-success/10
+            text-success
+          "
+        />
+
+        <KPICard
+          title="Ongoing"
+          value={ongoing}
+          icon={Clock}
+          color="
+            bg-info/10
+            text-info
+          "
+        />
+
+        <KPICard
+          title="On Hold"
+          value={onHold}
+          icon={Pause}
+          color="
+            bg-warning/10
+            text-warning
+          "
+        />
+
+      </div>
+    );
+  };

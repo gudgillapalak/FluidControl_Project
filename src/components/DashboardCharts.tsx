@@ -45,7 +45,7 @@ export const DashboardCharts = () => {
     useState("");
 
   /* =========================
-     FETCH PROJECTS FROM DB
+     FETCH PROJECTS
   ========================= */
 
   useEffect(() => {
@@ -54,267 +54,279 @@ export const DashboardCharts = () => {
 
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects =
+    async () => {
 
-    try {
+      try {
 
-      const token =
-        localStorage.getItem("token");
+        const token =
+          localStorage.getItem(
+            "token"
+          );
 
-      const res = await fetch(
+        const res =
+          await fetch(
 
-        `${import.meta.env.VITE_API_URL}/api/projects`,
+            `${import.meta.env.VITE_API_URL}/api/projects`,
 
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        const data =
+          await res.json();
+
+        if (
+          Array.isArray(data)
+        ) {
+
+          setProjects(data);
+
         }
-      );
 
-      const data =
-        await res.json();
+        else {
 
-      setProjects(data);
+          setProjects([]);
 
-    }
+        }
 
-    catch (error) {
+      }
 
-      console.log(error);
+      catch (error) {
 
-    }
-  };
+        console.log(error);
+
+        setProjects([]);
+
+      }
+    };
 
   /* =========================
      FILTER
   ========================= */
 
-  const filtered = useMemo(() => {
+  const filtered =
+    useMemo(() => {
 
-    let result = [...projects];
+      let result =
+        [...projects];
 
-    if (statusFilter !== "all") {
+      if (
+        statusFilter !== "all"
+      ) {
 
-      result = result.filter(
+        result =
+          result.filter(
 
-        (p) =>
-          groupStatus(p.status) ===
-          statusFilter
-      );
-    }
+            (p) =>
+              groupStatus(
+                p.status
+              ) ===
+              statusFilter
+          );
+      }
 
-    if (dateFrom) {
+      if (dateFrom) {
 
-      result = result.filter(
+        result =
+          result.filter(
 
-        (p) =>
-          p.start_date &&
-          p.start_date >= dateFrom
-      );
-    }
+            (p) =>
+              p.start_date &&
+              p.start_date >=
+                dateFrom
+          );
+      }
 
-    if (dateTo) {
+      if (dateTo) {
 
-      result = result.filter(
+        result =
+          result.filter(
 
-        (p) =>
-          p.end_date &&
-          p.end_date <= dateTo
-      );
-    }
+            (p) =>
+              p.end_date &&
+              p.end_date <=
+                dateTo
+          );
+      }
 
-    return result;
+      return result;
 
-  }, [
-    projects,
-    statusFilter,
-    dateFrom,
-    dateTo,
-  ]);
+    }, [
+
+      projects,
+
+      statusFilter,
+
+      dateFrom,
+
+      dateTo,
+    ]);
 
   /* =========================
      STATUS PIE
   ========================= */
 
-  const statusData = useMemo(() => {
+  const statusData =
+    useMemo(() => {
 
-    const counts: any = {};
+      const counts: any =
+        {};
 
-    filtered.forEach((p) => {
+      filtered.forEach(
+        (p) => {
 
-      const g =
-        groupStatus(p.status);
+          const g =
+            groupStatus(
+              p.status
+            );
 
-      counts[g] =
-        (counts[g] || 0) + 1;
-    });
+          counts[g] =
+            (counts[g] || 0) +
+            1;
+        }
+      );
 
-    return Object.entries(counts).map(
+      return Object.entries(
+        counts
+      ).map(
 
-      ([name, value]) => ({
+        ([name, value]) => ({
 
-        name,
+          name,
 
-        value,
+          value,
 
-        fill:
-          STATUS_GROUP_COLORS[
-            name
-          ] || "#8884d8",
-      })
-    );
+          fill:
+            STATUS_GROUP_COLORS[
+              name
+            ] || "#8884d8",
+        })
+      );
 
-  }, [filtered]);
+    }, [filtered]);
 
   /* =========================
      OWNER BAR
   ========================= */
 
-  const ownerData = useMemo(() => {
+  const ownerData =
+    useMemo(() => {
 
-    const counts: any = {};
+      const counts: any =
+        {};
 
-    filtered.forEach((p: any) => {
+      filtered.forEach(
+        (p: any) => {
 
-      const owner =
-        p.project_owner ||
-        "Unassigned";
+          const owner =
+            p.project_owner ||
+            "Unassigned";
 
-      counts[owner] =
-        (counts[owner] || 0) + 1;
-    });
+          counts[owner] =
+            (counts[owner] || 0) +
+            1;
+        }
+      );
 
-    return Object.entries(counts)
-
-      .map(([name, count]) => ({
-        name,
-        count,
-      }))
-
-      .sort(
-        (a: any, b: any) =>
-          b.count - a.count
+      return Object.entries(
+        counts
       )
 
-      .slice(0, 10);
+        .map(
+          ([name, count]) => ({
+            name,
+            count,
+          })
+        )
 
-  }, [filtered]);
+        .sort(
+          (
+            a: any,
+            b: any
+          ) =>
+            b.count -
+            a.count
+        )
+
+        .slice(0, 10);
+
+    }, [filtered]);
 
   /* =========================
      CATEGORY PIE
   ========================= */
 
-  const categoryData = useMemo(() => {
+  const categoryData =
+    useMemo(() => {
 
-    const counts: any = {};
+      const counts: any =
+        {};
 
-    filtered.forEach((p: any) => {
+      filtered.forEach(
+        (p: any) => {
 
-      const cat =
-        p.category || "Unknown";
+          const cat =
+            p.category ||
+            "Unknown";
 
-      counts[cat] =
-        (counts[cat] || 0) + 1;
-    });
-
-    return Object.entries(counts).map(
-
-      ([name, value]) => ({
-        name,
-        value,
-      })
-    );
-
-  }, [filtered]);
-
-  /* =========================
-     MARKET BAR
-  ========================= */
-
-  const marketData = useMemo(() => {
-
-    const counts: any = {};
-
-    filtered.forEach((p: any) => {
-
-      const market =
-        p.market_segment ||
-        "Unknown";
-
-      counts[market] =
-        (counts[market] || 0) + 1;
-    });
-
-    return Object.entries(counts)
-
-      .map(([name, count]) => ({
-        name,
-        count,
-      }))
-
-      .sort(
-        (a: any, b: any) =>
-          b.count - a.count
+          counts[cat] =
+            (counts[cat] || 0) +
+            1;
+        }
       );
 
-  }, [filtered]);
+      return Object.entries(
+        counts
+      ).map(
+
+        ([name, value]) => ({
+          name,
+          value,
+        })
+      );
+
+    }, [filtered]);
 
   /* =========================
-     BUSINESS PIE
+     OVERALL STATUS
   ========================= */
 
-  const businessData = useMemo(() => {
+  const overallStatusData =
+    useMemo(() => {
 
-    const counts: any = {};
+      const counts: any =
+        {};
 
-    filtered.forEach((p: any) => {
+      filtered.forEach(
+        (p: any) => {
 
-      const type =
-        p.business_opportunity ||
-        "NA";
+          const status =
+            groupStatus(
+              p.status
+            );
 
-      counts[type] =
-        (counts[type] || 0) + 1;
-    });
+          counts[status] =
+            (counts[status] || 0) +
+            1;
+        }
+      );
 
-    return Object.entries(counts).map(
+      return Object.entries(
+        counts
+      ).map(
 
-      ([name, value]) => ({
-        name,
-        value,
-      })
-    );
+        ([name, value]) => ({
+          name,
+          value,
+        })
+      );
 
-  }, [filtered]);
-
-  /* =========================
-     OVERALL STATUS PIE
-  ========================= */
-
-  const overallStatusData = useMemo(() => {
-
-    const counts: any = {};
-
-    filtered.forEach((p: any) => {
-
-      const status =
-        groupStatus(p.status);
-
-      counts[status] =
-        (counts[status] || 0) + 1;
-    });
-
-    return Object.entries(counts).map(
-
-      ([name, value]) => ({
-        name,
-        value,
-      })
-    );
-
-  }, [filtered]);
+    }, [filtered]);
 
   return (
 
@@ -324,16 +336,28 @@ export const DashboardCharts = () => {
 
       <div className="chart-container">
 
-        <h3>Filters</h3>
+        <h3>
+          Filters
+        </h3>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div
+          className="
+            grid
+            grid-cols-3
+            gap-4
+          "
+        >
 
           <div>
 
-            <Label>Status</Label>
+            <Label>
+              Status
+            </Label>
 
             <Select
-              value={statusFilter}
+              value={
+                statusFilter
+              }
               onValueChange={
                 setStatusFilter
               }
@@ -371,7 +395,9 @@ export const DashboardCharts = () => {
 
           <div>
 
-            <Label>From</Label>
+            <Label>
+              From
+            </Label>
 
             <Input
               type="date"
@@ -387,7 +413,9 @@ export const DashboardCharts = () => {
 
           <div>
 
-            <Label>To</Label>
+            <Label>
+              To
+            </Label>
 
             <Input
               type="date"
@@ -407,15 +435,26 @@ export const DashboardCharts = () => {
 
       {/* CHARTS */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div
+        className="
+          grid
+          grid-cols-1
+          lg:grid-cols-2
+          gap-6
+        "
+      >
 
         {/* STATUS */}
 
         <div className="chart-container">
 
-          <h3>Status Distribution</h3>
+          <h3>
+            Status Distribution
+          </h3>
 
-          <ResponsiveContainer height={280}>
+          <ResponsiveContainer
+            height={280}
+          >
 
             <PieChart>
 
@@ -451,9 +490,13 @@ export const DashboardCharts = () => {
 
         <div className="chart-container">
 
-          <h3>Projects per Owner</h3>
+          <h3>
+            Projects per Owner
+          </h3>
 
-          <ResponsiveContainer height={280}>
+          <ResponsiveContainer
+            height={280}
+          >
 
             <BarChart
               data={ownerData}
@@ -476,6 +519,105 @@ export const DashboardCharts = () => {
               />
 
             </BarChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+        {/* CATEGORY */}
+
+        <div className="chart-container">
+
+          <h3>
+            Project Category
+          </h3>
+
+          <ResponsiveContainer
+            height={280}
+          >
+
+            <PieChart>
+
+              <Pie
+                data={categoryData}
+                dataKey="value"
+              >
+
+                {categoryData.map(
+                  (_, i) => (
+
+                    <Cell
+                      key={i}
+                      fill={
+                        [
+                          "#3b82f6",
+                          "#f97316",
+                          "#a855f7",
+                          "#22c55e",
+                        ][i % 4]
+                      }
+                    />
+                  )
+                )}
+
+              </Pie>
+
+              <Tooltip />
+
+              <Legend />
+
+            </PieChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+        {/* OVERALL */}
+
+        <div className="chart-container">
+
+          <h3>
+            Overall Status
+          </h3>
+
+          <ResponsiveContainer
+            height={280}
+          >
+
+            <PieChart>
+
+              <Pie
+                data={
+                  overallStatusData
+                }
+                dataKey="value"
+                innerRadius={60}
+              >
+
+                {overallStatusData.map(
+                  (_, i) => (
+
+                    <Cell
+                      key={i}
+                      fill={
+                        [
+                          "#22c55e",
+                          "#3b82f6",
+                          "#f97316",
+                          "#a855f7",
+                        ][i % 4]
+                      }
+                    />
+                  )
+                )}
+
+              </Pie>
+
+              <Tooltip />
+
+              <Legend />
+
+            </PieChart>
 
           </ResponsiveContainer>
 

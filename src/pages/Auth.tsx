@@ -119,13 +119,13 @@ const handleLogin = async (
 
   try {
 
-    const res = await API.post(
-      "/login",
-      {
-        email: loginEmail,
-        password: loginPassword,
-      }
-    );
+   const res = await API.post(
+  "/login",
+  {
+    email: loginEmail.trim(),
+    password: loginPassword.trim(),
+  }
+);
 
     const user =
       res.data.user;
@@ -226,12 +226,12 @@ const handleLogin = async (
       await API.post(
         "/signup",
         {
-          name: signupName,
+          name: signupName.trim(),
 
-          email: signupEmail,
+          email: signupEmail.trim(),
 
           password:
-            signupPassword,
+            signupPassword.trim(),
 
           role:
             selectedRole,

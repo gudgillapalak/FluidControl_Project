@@ -414,25 +414,34 @@ const UploadData = () => {
                   })
                 );
 
-              /* =========================
-                 Upload To MongoDB
-              ========================= */
+             /* =========================
+   Upload To MongoDB
+========================= */
 
-              for (
-                const project of formatted
-              ) {
+const formData =
+  new FormData();
 
-                await PROJECT_API.post(
-                  "/",
-                  project
-                );
-              }
+formData.append(
+  "file",
+  file
+);
 
-              toast({
+await PROJECT_API.post(
+  "/upload",
+  formData,
+  {
+    headers: {
+      "Content-Type":
+        "multipart/form-data",
+    },
+  }
+);
 
-                title:
-                  `Uploaded ${formatted.length} projects successfully`,
-              });
+toast({
+
+  title:
+    `Uploaded ${formatted.length} projects successfully`,
+});
 
             }
 

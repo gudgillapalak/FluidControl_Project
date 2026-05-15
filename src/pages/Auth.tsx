@@ -200,8 +200,9 @@ const handleLogin = async (
       title: "Login Failed",
 
       description:
-        error.response?.data?.message ||
-        "Something went wrong",
+  error?.message ||
+  error.response?.data?.message ||
+  JSON.stringify(error),
 
       variant:
         "destructive",
@@ -256,8 +257,9 @@ const handleLogin = async (
           "Signup Failed",
 
         description:
-          error.response?.data?.message ||
-          "Something went wrong",
+  error?.message ||
+  error.response?.data?.message ||
+  JSON.stringify(error),
 
         variant:
           "destructive",

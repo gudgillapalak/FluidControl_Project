@@ -111,99 +111,104 @@ const Auth = () => {
   /* =========================
      LOGIN
   ========================= */
+const handleLogin = async (
+  e: React.FormEvent
+) => {
 
-  const handleLogin = async (
-    e: React.FormEvent
-  ) => {
+  e.preventDefault();
 
-    e.preventDefault();
+  try {
 
-    try {
+    const res = await API.post(
+      "/login",
+      {
+        email: loginEmail,
+        password: loginPassword,
+      }
+    );
 
-      const res = await API.post(
-        "/login",
-        {
-          email: loginEmail,
-          password: loginPassword,
-        }
-      );
+    const user =
+      res.data.user;
 
-      const user =
-        res.data.user;
+    const token =
+      res.data.token;
 
-      const token =
-        res.data.token;
+    /* Save */
 
-      /* Save */
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...user,
-          token,
-        })
-      );
-
-      auth.setUser({
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
         ...user,
         token,
-      });
+      })
+    );
 
-      auth.setRole(user.role);
+    /* FIX FOR DASHBOARD */
+    localStorage.setItem(
+      "token",
+      token
+    );
 
-      /* Success */
+    auth.setUser({
+      ...user,
+      token,
+    });
 
-      toast({
+    auth.setRole(user.role);
 
-        title:
-          "Login Successful",
+    /* Success */
 
-        description:
-          `Welcome ${user.role}!`,
-      });
+    toast({
 
-      /* Navigation */
+      title:
+        "Login Successful",
 
-      if (
-        user.role === "admin"
-      ) {
+      description:
+        `Welcome ${user.role}!`,
+    });
 
-        navigate("/dashboard");
+    /* Navigation */
 
-      }
+    if (
+      user.role === "admin"
+    ) {
 
-      else if (
-        user.role === "manager"
-      ) {
-
-        navigate("/projects");
-
-      }
-
-      else {
-
-        navigate("/employees");
-
-      }
+      navigate("/dashboard");
 
     }
 
-    catch (error: any) {
+    else if (
+      user.role === "manager"
+    ) {
 
-      toast({
-
-        title: "Login Failed",
-
-        description:
-          error.response?.data?.message ||
-          "Something went wrong",
-
-        variant:
-          "destructive",
-      });
+      navigate("/projects");
 
     }
-  };
+
+    else {
+
+      navigate("/employees");
+
+    }
+
+  }
+
+  catch (error: any) {
+
+    toast({
+
+      title: "Login Failed",
+
+      description:
+        error.response?.data?.message ||
+        "Something went wrong",
+
+      variant:
+        "destructive",
+    });
+
+  }
+};
 
   /* =========================
      SIGNUP

@@ -18,6 +18,9 @@ const authRoutes =
 const projectRoutes =
   require("./routes/projectRoutes");
 
+const activityRoutes =
+  require("./routes/activityRoutes");
+
 const app = express();
 
 /* =========================
@@ -56,6 +59,11 @@ app.use(
 app.use(
   "/api/projects",
   projectRoutes
+);
+
+app.use(
+  "/api/activity",
+  activityRoutes
 );
 
 /* =========================

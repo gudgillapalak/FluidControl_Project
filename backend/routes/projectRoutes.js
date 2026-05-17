@@ -11,6 +11,9 @@ const crypto = require("crypto");
 const Project =
   require("../models/Project");
 
+const Activity =
+  require("../models/Activity");
+
 const authMiddleware =
 require("../middleware/authMiddleware");
 
@@ -272,6 +275,25 @@ await Project.updateMany(
     isActiveBatch:
       true,
   }));
+  await Project.insertMany(
+  formatted
+);
+
+/* =========================
+   SAVE ACTIVITY
+========================= */
+
+await Activity.create({
+
+  user:
+    req.user.role,
+
+  action:
+    "Uploaded Excel",
+
+  entity:
+    `${formatted.length} Projects`,
+});
       /* =========================
          SAVE PROJECTS
       ========================= */
@@ -300,7 +322,7 @@ await Project.updateMany(
         message:
           error.message,
       });
-
+    
     }
   }
 );

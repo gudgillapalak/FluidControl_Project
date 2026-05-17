@@ -1,6 +1,9 @@
 const Project =
   require("../models/Project");
 
+const Activity =
+  require("../models/Activity");
+
 /* =========================
    GET ACTIVE PROJECTS
 ========================= */
@@ -34,6 +37,7 @@ exports.getProjects =
 
     }
   };
+
 /* =========================
    CREATE PROJECT
 ========================= */
@@ -79,8 +83,26 @@ exports.createProject =
 
           isDeleted: false,
 
+          isActiveBatch: true,
+
           remarks: [],
         });
+
+      /* =========================
+         SAVE ACTIVITY
+      ========================= */
+
+      await Activity.create({
+
+        user:
+          req.user.role,
+
+        action:
+          "Created Project",
+
+        entity:
+          project.project_name,
+      });
 
       res.status(201).json(
         project
@@ -123,6 +145,22 @@ exports.deleteProject =
           }
         );
 
+      /* =========================
+         SAVE ACTIVITY
+      ========================= */
+
+      await Activity.create({
+
+        user:
+          req.user.role,
+
+        action:
+          "Deleted Project",
+
+        entity:
+          updated.project_name,
+      });
+
       res.status(200).json({
 
         message:
@@ -159,8 +197,6 @@ exports.getCompletedProjects =
           isCompleted: true,
 
           isDeleted: false,
-
-          isActiveBatch: true,
         });
 
       res.status(200).json(
@@ -193,8 +229,6 @@ exports.getDeletedProjects =
         await Project.find({
 
           isDeleted: true,
-
-          isActiveBatch: true,
         });
 
       res.status(200).json(
@@ -240,6 +274,22 @@ exports.markCompleted =
             new: true,
           }
         );
+
+      /* =========================
+         SAVE ACTIVITY
+      ========================= */
+
+      await Activity.create({
+
+        user:
+          req.user.role,
+
+        action:
+          "Marked Completed",
+
+        entity:
+          updated.project_name,
+      });
 
       res.status(200).json(
         updated

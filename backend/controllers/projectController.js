@@ -213,3 +213,47 @@ exports.getDeletedProjects =
 
     }
   };
+
+/* =========================
+   MARK PROJECT COMPLETED
+========================= */
+
+exports.markCompleted =
+  async (req, res) => {
+
+    try {
+
+      const updated =
+        await Project.findByIdAndUpdate(
+
+          req.params.id,
+
+          {
+
+            isCompleted: true,
+
+            status:
+              "Completed",
+          },
+
+          {
+            new: true,
+          }
+        );
+
+      res.status(200).json(
+        updated
+      );
+
+    }
+
+    catch (error) {
+
+      res.status(500).json({
+
+        message:
+          error.message,
+      });
+
+    }
+  };

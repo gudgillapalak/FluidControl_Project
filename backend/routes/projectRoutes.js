@@ -195,55 +195,75 @@ router.post(
          FORMAT ROWS
       ========================= */
 
-      const formatted =
-        data.map((row) => ({
+     const formatted =
+  data.map((row) => ({
 
-          project_name:
-  row.project_name ||
-  row.Project ||
-  row["Project Name"] ||
-  row["PROJECT NAME"] ||
-  "Unnamed Project",
+    project_name:
 
-          category:
-  row.category ||
-  row.Category ||
-  row["Category"] ||
-  "NA",
+      row[" Title of Project"] ||
 
-        status:
-  row.status ||
-  row.Status ||
-  row["Status"] ||
-  "Pending",
+      row.project_name ||
 
-         project_owner:
-  row.project_owner ||
-  row.Owner ||
-  row["Project Owner"] ||
-  "Not Assigned",
+      row.Project ||
 
-          start_date:
-            row.start_date ||
-            row.Start_Date ||
-            "",
+      "Unnamed Project",
 
-          end_date:
-            row.end_date ||
-            row.End_Date ||
-            "",
+    category:
 
-          /* =========================
-             BATCH DATA
-          ========================= */
+      row["PROJECT CATEGORY"] ||
 
-          uploadBatchId:
-            batchId,
+      row.category ||
 
-          isActiveBatch:
-            true,
-        }));
+      row.Category ||
 
+      "NA",
+
+    status:
+
+      row["Overall Status"] ||
+
+      row.status ||
+
+      row.Status ||
+
+      "Pending",
+
+    project_owner:
+
+      row["PROJECT OWNER"] ||
+
+      row.project_owner ||
+
+      row.Owner ||
+
+      "Not Assigned",
+
+    start_date:
+
+      row["DATE OF START"] ||
+
+      row.start_date ||
+
+      row.Start_Date ||
+
+      "",
+
+    end_date:
+
+      row["TARGET DATE"] ||
+
+      row.end_date ||
+
+      row.End_Date ||
+
+      "",
+
+    uploadBatchId:
+      batchId,
+
+    isActiveBatch:
+      true,
+  }));
       /* =========================
          SAVE PROJECTS
       ========================= */

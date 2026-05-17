@@ -60,6 +60,20 @@ const projectSchema =
         default: false,
       },
 
+      /* =========================
+   UPLOAD SESSION
+========================= */
+
+uploadBatchId: {
+  type: String,
+  default: null,
+},
+
+isActiveBatch: {
+  type: Boolean,
+  default: true,
+},
+
       remarks: [
         {
           message: String,

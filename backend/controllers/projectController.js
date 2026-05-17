@@ -2,7 +2,7 @@ const Project =
   require("../models/Project");
 
 /* =========================
-   GET ALL PROJECTS
+   GET ACTIVE PROJECTS
 ========================= */
 
 exports.getProjects =
@@ -14,6 +14,8 @@ exports.getProjects =
         await Project.find({
 
           isDeleted: false,
+
+          isActiveBatch: true,
         });
 
       res.status(200).json(
@@ -32,7 +34,6 @@ exports.getProjects =
 
     }
   };
-
 /* =========================
    CREATE PROJECT
 ========================= */
@@ -158,6 +159,8 @@ exports.getCompletedProjects =
           isCompleted: true,
 
           isDeleted: false,
+
+          isActiveBatch: true,
         });
 
       res.status(200).json(
@@ -190,54 +193,12 @@ exports.getDeletedProjects =
         await Project.find({
 
           isDeleted: true,
+
+          isActiveBatch: true,
         });
 
       res.status(200).json(
         projects
-      );
-
-    }
-
-    catch (error) {
-
-      res.status(500).json({
-
-        message:
-          error.message,
-      });
-
-    }
-  };
-
-/* =========================
-   MARK PROJECT COMPLETED
-========================= */
-
-exports.markCompleted =
-  async (req, res) => {
-
-    try {
-
-      const updated =
-        await Project.findByIdAndUpdate(
-
-          req.params.id,
-
-          {
-
-            isCompleted: true,
-
-            status:
-              "Completed",
-          },
-
-          {
-            new: true,
-          }
-        );
-
-      res.status(200).json(
-        updated
       );
 
     }

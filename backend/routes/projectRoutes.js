@@ -6,6 +6,8 @@ const multer = require("multer");
 
 const XLSX = require("xlsx");
 
+const crypto = require("crypto");
+
 const Project =
   require("../models/Project");
 
@@ -59,11 +61,6 @@ router.post(
   authMiddleware,
   createProject
 );
-
-
-
-
-
 
 /* =========================
    COMPLETED PROJECTS
@@ -150,6 +147,32 @@ router.post(
 
     try {
 
+      /* =========================
+         DEACTIVATE OLD BATCH
+      ========================= */
+
+      await Project.updateMany(
+
+        { isActiveBatch: true },
+
+        {
+          $set: {
+            isActiveBatch: false,
+          },
+        }
+      );
+
+      /* =========================
+         CREATE NEW BATCH ID
+      ========================= */
+
+      const batchId =
+        crypto.randomUUID();
+
+      /* =========================
+         READ EXCEL
+      ========================= */
+
       const workbook =
         XLSX.read(
           req.file.buffer,
@@ -168,7 +191,9 @@ router.post(
           sheet
         );
 
-      /* Format Excel Rows */
+      /* =========================
+         FORMAT ROWS
+      ========================= */
 
       const formatted =
         data.map((row) => ({
@@ -202,7 +227,21 @@ router.post(
             row.end_date ||
             row.End_Date ||
             "",
+
+          /* =========================
+             BATCH DATA
+          ========================= */
+
+          uploadBatchId:
+            batchId,
+
+          isActiveBatch:
+            true,
         }));
+
+      /* =========================
+         SAVE PROJECTS
+      ========================= */
 
       await Project.insertMany(
         formatted
@@ -215,6 +254,8 @@ router.post(
 
         count:
           formatted.length,
+
+        batchId,
       });
 
     }
@@ -222,6 +263,7 @@ router.post(
     catch (error) {
 
       res.status(500).json({
+
         message:
           error.message,
       });

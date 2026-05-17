@@ -209,25 +209,29 @@ await Project.updateMany(
     const formatted =
   data.map((row) => ({
 
-   project_name:
+  project_name:
+
+  row[" Title of Project"] ||
+
   row.project_name ||
+
   row.Project ||
-  row["Project Name"] ||
-  row["PROJECT NAME"] ||
-  row["project name"] ||
-  row["Project_Name"] ||
-  row["Name"] ||
+
   "Unnamed Project",
 
     category:
-      row.category ||
-      row.Category ||
-      "NA",
+
+  row["PROJECT CATEGORY"] ||
+
+  "NA",
 
     status:
-      row.status ||
-      row.Status ||
-      "Pending",
+
+  row["Overall Status"] ||
+
+  row["Status"] ||
+
+  "Pending",
 
     project_owner:
   row.project_owner ||
@@ -238,14 +242,16 @@ await Project.updateMany(
   "Not Assigned",
 
     start_date:
-      row.start_date ||
-      row.Start_Date ||
-      "",
 
-    end_date:
-      row.end_date ||
-      row.End_Date ||
-      "",
+  row["DATE OF START"] ||
+
+  "",
+
+   end_date:
+
+  row["TARGET DATE"] ||
+
+  "",
 
     uploadBatchId:
       batchId,

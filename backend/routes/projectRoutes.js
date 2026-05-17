@@ -209,11 +209,15 @@ await Project.updateMany(
     const formatted =
   data.map((row) => ({
 
-    project_name:
-      row.project_name ||
-      row.Project ||
-      row["Project Name"] ||
-      "Unnamed Project",
+   project_name:
+  row.project_name ||
+  row.Project ||
+  row["Project Name"] ||
+  row["PROJECT NAME"] ||
+  row["project name"] ||
+  row["Project_Name"] ||
+  row["Name"] ||
+  "Unnamed Project",
 
     category:
       row.category ||
@@ -226,10 +230,12 @@ await Project.updateMany(
       "Pending",
 
     project_owner:
-      row.project_owner ||
-      row.Owner ||
-      row["Project Owner"] ||
-      "Not Assigned",
+  row.project_owner ||
+  row.Owner ||
+  row["Project Owner"] ||
+  row["PROJECT OWNER"] ||
+  row["owner"] ||
+  "Not Assigned",
 
     start_date:
       row.start_date ||

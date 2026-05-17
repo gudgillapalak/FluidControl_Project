@@ -41,7 +41,9 @@ exports.signup = async (req, res) => {
     ========================= */
 
     const existingUser =
-      await User.findOne({ email });
+      await User.findOne({
+        email,
+      });
 
     if (existingUser) {
 
@@ -63,22 +65,21 @@ exports.signup = async (req, res) => {
       );
 
     /* =========================
-       CREATE USER
+       CREATE EMPLOYEE
     ========================= */
 
-    const user =
-      await User.create({
+    await User.create({
 
-        name,
+      name,
 
-        email,
+      email,
 
-        password:
-          hashedPassword,
+      password:
+        hashedPassword,
 
-        role:
-          "employee",
-      });
+      role:
+        "employee",
+    });
 
     res.status(201).json({
 
@@ -129,88 +130,6 @@ exports.login = async (req, res) => {
           "User not found",
       });
     }
-
-    /* =========================
-   CREATE ADMIN / MANAGER
-========================= */
-
-exports.createUser =
-  async (req, res) => {
-
-    try {
-
-      const {
-        name,
-        email,
-        password,
-        role,
-      } = req.body;
-
-      /* Only admin/manager allowed */
-
-      if (
-        role !== "admin" &&
-        role !== "manager"
-      ) {
-
-        return res.status(400).json({
-
-          message:
-            "Invalid role",
-        });
-      }
-
-      const existing =
-        await User.findOne({
-          email,
-        });
-
-      if (existing) {
-
-        return res.status(400).json({
-
-          message:
-            "User already exists",
-        });
-      }
-
-      const hashedPassword =
-        await bcrypt.hash(
-          password,
-          10
-        );
-
-      const user =
-        await User.create({
-
-          name,
-
-          email,
-
-          password:
-            hashedPassword,
-
-          role,
-        });
-
-      res.status(201).json({
-
-        message:
-          `${role} created successfully`,
-      });
-
-    }
-
-    catch (error) {
-
-      res.status(500).json({
-
-        message:
-          error.message,
-      });
-
-    }
-  };
 
     /* =========================
        CHECK PASSWORD
@@ -286,3 +205,98 @@ exports.createUser =
 
   }
 };
+
+/* =========================
+   CREATE ADMIN / MANAGER
+========================= */
+
+exports.createUser =
+  async (req, res) => {
+
+    try {
+
+      const {
+        name,
+        email,
+        password,
+        role,
+      } = req.body;
+
+      /* =========================
+         VALIDATE ROLE
+      ========================= */
+
+      if (
+        role !== "admin" &&
+        role !== "manager"
+      ) {
+
+        return res.status(400).json({
+
+          message:
+            "Invalid role",
+        });
+      }
+
+      /* =========================
+         CHECK EXISTING USER
+      ========================= */
+
+      const existing =
+        await User.findOne({
+          email,
+        });
+
+      if (existing) {
+
+        return res.status(400).json({
+
+          message:
+            "User already exists",
+        });
+      }
+
+      /* =========================
+         HASH PASSWORD
+      ========================= */
+
+      const hashedPassword =
+        await bcrypt.hash(
+          password,
+          10
+        );
+
+      /* =========================
+         CREATE USER
+      ========================= */
+
+      await User.create({
+
+        name,
+
+        email,
+
+        password:
+          hashedPassword,
+
+        role,
+      });
+
+      res.status(201).json({
+
+        message:
+          `${role} created successfully`,
+      });
+
+    }
+
+    catch (error) {
+
+      res.status(500).json({
+
+        message:
+          error.message,
+      });
+
+    }
+  };

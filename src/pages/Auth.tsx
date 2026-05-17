@@ -34,6 +34,8 @@ import {
   Shield,
   UserCog,
   User,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 /* =========================
@@ -108,6 +110,16 @@ const Auth = () => {
 
   const [signupPassword, setSignupPassword] =
     useState("");
+
+  /* =========================
+     SHOW/HIDE PASSWORD
+  ========================= */
+
+  const [showLoginPassword, setShowLoginPassword] =
+    useState(true);
+
+  const [showSignupPassword, setShowSignupPassword] =
+    useState(true);
 
   /* =========================
      LOGIN
@@ -540,18 +552,50 @@ const Auth = () => {
                         Password
                       </Label>
 
-                      <Input
-                        type="password"
-                        value={
-                          loginPassword
-                        }
-                        onChange={(e) =>
-                          setLoginPassword(
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
+                      <div className="relative">
+
+                        <Input
+                          type={
+                            showLoginPassword
+                              ? "text"
+                              : "password"
+                          }
+                          value={
+                            loginPassword
+                          }
+                          onChange={(e) =>
+                            setLoginPassword(
+                              e.target.value
+                            )
+                          }
+                          required
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowLoginPassword(
+                              !showLoginPassword
+                            )
+                          }
+                          className="
+                            absolute
+                            right-3
+                            top-1/2
+                            -translate-y-1/2
+                            text-muted-foreground
+                          "
+                        >
+
+                          {showLoginPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+
+                        </button>
+
+                      </div>
 
                     </div>
 
@@ -632,18 +676,50 @@ const Auth = () => {
                           Password
                         </Label>
 
-                        <Input
-                          type="password"
-                          value={
-                            signupPassword
-                          }
-                          onChange={(e) =>
-                            setSignupPassword(
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
+                        <div className="relative">
+
+                          <Input
+                            type={
+                              showSignupPassword
+                                ? "text"
+                                : "password"
+                            }
+                            value={
+                              signupPassword
+                            }
+                            onChange={(e) =>
+                              setSignupPassword(
+                                e.target.value
+                              )
+                            }
+                            required
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowSignupPassword(
+                                !showSignupPassword
+                              )
+                            }
+                            className="
+                              absolute
+                              right-3
+                              top-1/2
+                              -translate-y-1/2
+                              text-muted-foreground
+                            "
+                          >
+
+                            {showSignupPassword ? (
+                              <EyeOff size={18} />
+                            ) : (
+                              <Eye size={18} />
+                            )}
+
+                          </button>
+
+                        </div>
 
                       </div>
 

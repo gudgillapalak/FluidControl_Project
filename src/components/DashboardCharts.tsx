@@ -59,11 +59,14 @@ export const DashboardCharts = () => {
 
       try {
 
-        const token =
-          localStorage.getItem(
-            "token"
-          );
+       const token =
+  JSON.parse(
 
+    localStorage.getItem(
+      "user"
+    ) || "{}"
+
+  ).token;
         const res =
           await fetch(
 
@@ -85,6 +88,12 @@ export const DashboardCharts = () => {
         ) {
 
           setProjects(data);
+          localStorage.setItem(
+
+  "projects",
+
+  JSON.stringify(data)
+);
 
         }
 

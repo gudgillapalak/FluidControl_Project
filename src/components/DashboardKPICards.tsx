@@ -9,7 +9,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import { groupStatus } from "@/types/project";
+
+import { groupStatus }
+from "@/types/project";
 
 const KPICard = ({
   title,
@@ -61,6 +63,10 @@ export const DashboardKPICards =
     const [projects, setProjects] =
       useState<any[]>([]);
 
+    /* =========================
+       FETCH PROJECTS
+    ========================= */
+
     useEffect(() => {
 
       fetchProjects();
@@ -73,17 +79,22 @@ export const DashboardKPICards =
         try {
 
           const token =
-            localStorage.getItem(
-              "token"
-            );
+            JSON.parse(
+
+              localStorage.getItem(
+                "user"
+              ) || "{}"
+
+            ).token;
 
           const response =
             await fetch(
 
-              `${import.meta.env.VITE_API_URL}/api/projects`,
+`${import.meta.env.VITE_API_URL}/api/projects`,
 
               {
                 headers: {
+
                   Authorization:
                     `Bearer ${token}`,
                 },
@@ -93,11 +104,22 @@ export const DashboardKPICards =
           const data =
             await response.json();
 
-          if (Array.isArray(data)) {
+          if (
+            Array.isArray(data)
+          ) {
 
             setProjects(data);
 
-          } else {
+            localStorage.setItem(
+
+              "projects",
+
+              JSON.stringify(data)
+            );
+
+          }
+
+          else {
 
             setProjects([]);
 
@@ -114,32 +136,36 @@ export const DashboardKPICards =
         }
       };
 
+    /* =========================
+       COUNTS
+    ========================= */
+
     const totalProjects =
       projects.length;
 
-   const completed =
-  projects.filter(
-    (p) =>
-      groupStatus(
-        p.status
-      ) === "Completed"
-  ).length;
+    const completed =
+      projects.filter(
+        (p) =>
+          groupStatus(
+            p.status
+          ) === "Completed"
+      ).length;
 
-const ongoing =
-  projects.filter(
-    (p) =>
-      groupStatus(
-        p.status
-      ) === "Ongoing"
-  ).length;
+    const ongoing =
+      projects.filter(
+        (p) =>
+          groupStatus(
+            p.status
+          ) === "Ongoing"
+      ).length;
 
-const onHold =
-  projects.filter(
-    (p) =>
-      groupStatus(
-        p.status
-      ) === "On Hold"
-  ).length;
+    const onHold =
+      projects.filter(
+        (p) =>
+          groupStatus(
+            p.status
+          ) === "On Hold"
+      ).length;
 
     return (
 

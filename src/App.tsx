@@ -36,6 +36,7 @@ import NotFound from "./pages/NotFound";
 import { Calendar } from "lucide-react";
 import CalendarView from "./pages/CalendarView";
 import Reports from "./pages/Reports";
+import UserManagement from "./pages/UserManagement";
 
 /* =========================
    Query Client
@@ -220,7 +221,14 @@ const App = () => (
             {/* =========================
                 Future Modules
             ========================= */}
-
+            <Route
+  path="/user-management"
+  element={
+    <ProtectedRoute allowedRoles={["superadmin"]}>
+      <UserManagement />
+    </ProtectedRoute>
+  }
+/>
             {/* Completed Projects */}
             <Route
   path="/completed-projects"

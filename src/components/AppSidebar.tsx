@@ -116,6 +116,13 @@ const navItems = [
     icon: BarChart3,
     roles: ['admin', 'manager'],
   },
+
+  {
+  title: 'User Management',
+  url: '/user-management',
+  icon: UserCog,
+  roles: ['superadmin'],
+},
 ];
 
 export function AppSidebar() {

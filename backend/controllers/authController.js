@@ -19,32 +19,69 @@ exports.signup = async (req, res) => {
       role,
     } = req.body;
 
+    /* =========================
+       BLOCK PROTECTED ROLES
+    ========================= */
+
+    if (
+      role === "superadmin" ||
+      role === "admin" ||
+      role === "manager"
+    ) {
+
+      return res.status(403).json({
+
+        message:
+          "Signup not allowed for this role",
+      });
+    }
+
+    /* =========================
+       CHECK EXISTING USER
+    ========================= */
+
     const existingUser =
       await User.findOne({ email });
 
     if (existingUser) {
 
       return res.status(400).json({
-        message: "User already exists",
-      });
 
+        message:
+          "User already exists",
+      });
     }
 
+    /* =========================
+       HASH PASSWORD
+    ========================= */
+
     const hashedPassword =
-      await bcrypt.hash(password, 10);
+      await bcrypt.hash(
+        password,
+        10
+      );
 
-    const user = await User.create({
+    /* =========================
+       CREATE USER
+    ========================= */
 
-      name,
+    const user =
+      await User.create({
 
-      email,
+        name,
 
-      password: hashedPassword,
+        email,
 
-      role,
-    });
+        password:
+          hashedPassword,
+
+        role:
+          "employee",
+      });
 
     res.status(201).json({
+
       message:
         "Account created successfully",
     });
@@ -54,7 +91,9 @@ exports.signup = async (req, res) => {
   catch (error) {
 
     res.status(500).json({
-      message: error.message,
+
+      message:
+        error.message,
     });
 
   }
@@ -68,19 +107,114 @@ exports.login = async (req, res) => {
 
   try {
 
-    const { email, password } =
-      req.body;
+    const {
+      email,
+      password,
+    } = req.body;
+
+    /* =========================
+       FIND USER
+    ========================= */
 
     const user =
-      await User.findOne({ email });
+      await User.findOne({
+        email,
+      });
 
     if (!user) {
 
       return res.status(400).json({
-        message: "User not found",
+
+        message:
+          "User not found",
+      });
+    }
+
+    /* =========================
+   CREATE ADMIN / MANAGER
+========================= */
+
+exports.createUser =
+  async (req, res) => {
+
+    try {
+
+      const {
+        name,
+        email,
+        password,
+        role,
+      } = req.body;
+
+      /* Only admin/manager allowed */
+
+      if (
+        role !== "admin" &&
+        role !== "manager"
+      ) {
+
+        return res.status(400).json({
+
+          message:
+            "Invalid role",
+        });
+      }
+
+      const existing =
+        await User.findOne({
+          email,
+        });
+
+      if (existing) {
+
+        return res.status(400).json({
+
+          message:
+            "User already exists",
+        });
+      }
+
+      const hashedPassword =
+        await bcrypt.hash(
+          password,
+          10
+        );
+
+      const user =
+        await User.create({
+
+          name,
+
+          email,
+
+          password:
+            hashedPassword,
+
+          role,
+        });
+
+      res.status(201).json({
+
+        message:
+          `${role} created successfully`,
       });
 
     }
+
+    catch (error) {
+
+      res.status(500).json({
+
+        message:
+          error.message,
+      });
+
+    }
+  };
+
+    /* =========================
+       CHECK PASSWORD
+    ========================= */
 
     const isMatch =
       await bcrypt.compare(
@@ -91,30 +225,52 @@ exports.login = async (req, res) => {
     if (!isMatch) {
 
       return res.status(400).json({
-        message: "Invalid password",
-      });
 
+        message:
+          "Invalid password",
+      });
     }
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    /* =========================
+       CREATE TOKEN
+    ========================= */
+
+    const token =
+      jwt.sign(
+
+        {
+          id: user._id,
+          role: user.role,
+        },
+
+        process.env.JWT_SECRET,
+
+        {
+          expiresIn: "7d",
+        }
+      );
+
+    /* =========================
+       RESPONSE
+    ========================= */
 
     res.status(200).json({
 
       token,
 
       user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
+
+        id:
+          user._id,
+
+        name:
+          user.name,
+
+        email:
+          user.email,
+
+        role:
+          user.role,
       },
     });
 
@@ -123,7 +279,9 @@ exports.login = async (req, res) => {
   catch (error) {
 
     res.status(500).json({
-      message: error.message,
+
+      message:
+        error.message,
     });
 
   }

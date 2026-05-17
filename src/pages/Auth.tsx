@@ -41,9 +41,10 @@ import {
 ========================= */
 
 const roles = [
+
   {
-    label: "Super User",
-    role: "admin",
+    label: "Super Admin",
+    role: "superadmin",
     icon: Shield,
     color:
       "bg-destructive/10 text-destructive border-destructive/20",
@@ -111,105 +112,133 @@ const Auth = () => {
   /* =========================
      LOGIN
   ========================= */
-const handleLogin = async (
-  e: React.FormEvent
-) => {
 
-  e.preventDefault();
+  const handleLogin = async (
+    e: React.FormEvent
+  ) => {
 
-  try {
+    e.preventDefault();
 
-   const res = await API.post(
-  "/login",
-  {
-    email: loginEmail.trim(),
-    password: loginPassword.trim(),
-  }
-);
+    try {
 
-    const user =
-      res.data.user;
+      const res = await API.post(
+        "/login",
+        {
+          email:
+            loginEmail.trim(),
 
-    const token =
-      res.data.token;
+          password:
+            loginPassword.trim(),
+        }
+      );
 
-    /* Save */
+      const user =
+        res.data.user;
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
+      const token =
+        res.data.token;
+
+      /* Save */
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...user,
+          token,
+        })
+      );
+
+      localStorage.setItem(
+        "token",
+        token
+      );
+
+      localStorage.setItem(
+        "role",
+        user.role
+      );
+
+      auth.setUser({
         ...user,
         token,
-      })
-    );
+      });
 
-    /* FIX FOR DASHBOARD */
-    localStorage.setItem(
-      "token",
-      token
-    );
+      auth.setRole(
+        user.role
+      );
 
-    auth.setUser({
-      ...user,
-      token,
-    });
+      /* Success */
 
-    auth.setRole(user.role);
+      toast({
 
-    /* Success */
+        title:
+          "Login Successful",
 
-    toast({
+        description:
+          `Welcome ${user.role}!`,
+      });
 
-      title:
-        "Login Successful",
+      /* Navigation */
 
-      description:
-        `Welcome ${user.role}!`,
-    });
+      if (
+        user.role ===
+        "superadmin"
+      ) {
 
-    /* Navigation */
+        navigate(
+          "/dashboard"
+        );
 
-    if (
-      user.role === "admin"
-    ) {
+      }
 
-      navigate("/dashboard");
+      else if (
+
+        user.role ===
+          "admin" ||
+
+        user.role ===
+          "manager"
+      ) {
+
+        navigate(
+          "/projects"
+        );
+
+      }
+
+      else {
+
+        navigate(
+          "/employees"
+        );
+
+      }
 
     }
 
-    else if (
-      user.role === "manager"
-    ) {
+    catch (error: any) {
 
-      navigate("/projects");
+      toast({
+
+        title:
+          "Login Failed",
+
+        description:
+          error.response
+            ?.data?.message ||
+
+          error?.message ||
+
+          JSON.stringify(
+            error
+          ),
+
+        variant:
+          "destructive",
+      });
 
     }
-
-    else {
-
-      navigate("/employees");
-
-    }
-
-  }
-
-  catch (error: any) {
-
-    toast({
-
-      title: "Login Failed",
-
-      description:
-  error?.message ||
-  error.response?.data?.message ||
-  JSON.stringify(error),
-
-      variant:
-        "destructive",
-    });
-
-  }
-};
+  };
 
   /* =========================
      SIGNUP
@@ -226,9 +255,11 @@ const handleLogin = async (
       await API.post(
         "/signup",
         {
-          name: signupName.trim(),
+          name:
+            signupName.trim(),
 
-          email: signupEmail.trim(),
+          email:
+            signupEmail.trim(),
 
           password:
             signupPassword.trim(),
@@ -257,9 +288,14 @@ const handleLogin = async (
           "Signup Failed",
 
         description:
-  error?.message ||
-  error.response?.data?.message ||
-  JSON.stringify(error),
+          error.response
+            ?.data?.message ||
+
+          error?.message ||
+
+          JSON.stringify(
+            error
+          ),
 
         variant:
           "destructive",
@@ -426,38 +462,68 @@ const handleLogin = async (
 
               <Tabs defaultValue="login">
 
-                <TabsList className="grid w-full grid-cols-2">
+                {/* =========================
+                    EMPLOYEE
+                ========================= */}
 
-                  <TabsTrigger value="login">
+                {selectedRole === "employee" ? (
 
-                    Sign In
+                  <TabsList className="grid w-full grid-cols-2">
 
-                  </TabsTrigger>
+                    <TabsTrigger value="login">
 
-                  <TabsTrigger value="signup">
+                      Sign In
 
-                    Sign Up
+                    </TabsTrigger>
 
-                  </TabsTrigger>
+                    <TabsTrigger value="signup">
 
-                </TabsList>
+                      Sign Up
 
-                {/* LOGIN */}
+                    </TabsTrigger>
+
+                  </TabsList>
+
+                ) : (
+
+                  <TabsList className="grid w-full grid-cols-1">
+
+                    <TabsTrigger value="login">
+
+                      Sign In
+
+                    </TabsTrigger>
+
+                  </TabsList>
+
+                )}
+
+                {/* =========================
+                    LOGIN
+                ========================= */}
 
                 <TabsContent value="login">
 
                   <form
-                    onSubmit={handleLogin}
+                    onSubmit={
+                      handleLogin
+                    }
                     className="space-y-4 mt-4"
                   >
 
                     <div>
 
-                      <Label>Email</Label>
+                      <Label>
+                        Email
+                      </Label>
 
                       <Input
                         type="email"
-                        value={loginEmail}
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        value={
+                          loginEmail
+                        }
                         onChange={(e) =>
                           setLoginEmail(
                             e.target.value
@@ -470,11 +536,15 @@ const handleLogin = async (
 
                     <div>
 
-                      <Label>Password</Label>
+                      <Label>
+                        Password
+                      </Label>
 
                       <Input
                         type="password"
-                        value={loginPassword}
+                        value={
+                          loginPassword
+                        }
                         onChange={(e) =>
                           setLoginPassword(
                             e.target.value
@@ -498,89 +568,111 @@ const handleLogin = async (
 
                 </TabsContent>
 
-                {/* SIGNUP */}
+                {/* =========================
+                    SIGNUP
+                ========================= */}
 
-                <TabsContent value="signup">
+                {selectedRole === "employee" && (
 
-                  <form
-                    onSubmit={handleSignup}
-                    className="space-y-4 mt-4"
-                  >
+                  <TabsContent value="signup">
 
-                    <div>
-
-                      <Label>
-                        Full Name
-                      </Label>
-
-                      <Input
-                        value={signupName}
-                        onChange={(e) =>
-                          setSignupName(
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-
-                    </div>
-
-                    <div>
-
-                      <Label>Email</Label>
-
-                      <Input
-                        type="email"
-                        value={signupEmail}
-                        onChange={(e) =>
-                          setSignupEmail(
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-
-                    </div>
-
-                    <div>
-
-                      <Label>
-                        Password
-                      </Label>
-
-                      <Input
-                        type="password"
-                        value={signupPassword}
-                        onChange={(e) =>
-                          setSignupPassword(
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full"
+                    <form
+                      onSubmit={
+                        handleSignup
+                      }
+                      className="space-y-4 mt-4"
                     >
 
-                      Sign Up
+                      <div>
 
-                    </Button>
+                        <Label>
+                          Full Name
+                        </Label>
 
-                  </form>
+                        <Input
+                          value={
+                            signupName
+                          }
+                          onChange={(e) =>
+                            setSignupName(
+                              e.target.value
+                            )
+                          }
+                          required
+                        />
 
-                </TabsContent>
+                      </div>
+
+                      <div>
+
+                        <Label>
+                          Email
+                        </Label>
+
+                        <Input
+                          type="email"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          value={
+                            signupEmail
+                          }
+                          onChange={(e) =>
+                            setSignupEmail(
+                              e.target.value
+                            )
+                          }
+                          required
+                        />
+
+                      </div>
+
+                      <div>
+
+                        <Label>
+                          Password
+                        </Label>
+
+                        <Input
+                          type="password"
+                          value={
+                            signupPassword
+                          }
+                          onChange={(e) =>
+                            setSignupPassword(
+                              e.target.value
+                            )
+                          }
+                          required
+                        />
+
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="w-full"
+                      >
+
+                        Sign Up
+
+                      </Button>
+
+                    </form>
+
+                  </TabsContent>
+
+                )}
 
               </Tabs>
 
-              {/* Back Button */}
+              {/* =========================
+                  BACK BUTTON
+              ========================= */}
 
               <button
                 onClick={() =>
-                  setSelectedRole(null)
+                  setSelectedRole(
+                    null
+                  )
                 }
                 className="
                   text-sm mt-4
@@ -602,7 +694,6 @@ const handleLogin = async (
       </div>
 
     </div>
-
   );
 };
 

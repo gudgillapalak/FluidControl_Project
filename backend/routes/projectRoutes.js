@@ -199,24 +199,29 @@ router.post(
         data.map((row) => ({
 
           project_name:
-            row.project_name ||
-            row.Project ||
-            "Unnamed Project",
+  row.project_name ||
+  row.Project ||
+  row["Project Name"] ||
+  row["PROJECT NAME"] ||
+  "Unnamed Project",
 
           category:
-            row.category ||
-            row.Category ||
-            "NA",
+  row.category ||
+  row.Category ||
+  row["Category"] ||
+  "NA",
 
-          status:
-            row.status ||
-            row.Status ||
-            "Pending",
+        status:
+  row.status ||
+  row.Status ||
+  row["Status"] ||
+  "Pending",
 
-          project_owner:
-            row.project_owner ||
-            row.Owner ||
-            "Not Assigned",
+         project_owner:
+  row.project_owner ||
+  row.Owner ||
+  row["Project Owner"] ||
+  "Not Assigned",
 
           start_date:
             row.start_date ||

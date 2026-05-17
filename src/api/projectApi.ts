@@ -3,7 +3,7 @@ import axios from "axios";
 const PROJECT_API = axios.create({
 
   baseURL:
-    "http://localhost:5000/api/projects",
+    `${import.meta.env.VITE_API_URL}/api/projects`,
 
 });
 

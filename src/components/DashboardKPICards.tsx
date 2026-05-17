@@ -9,6 +9,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { groupStatus } from "@/types/project";
 
 const KPICard = ({
   title,
@@ -116,35 +117,29 @@ export const DashboardKPICards =
     const totalProjects =
       projects.length;
 
-    const completed =
-      projects.filter(
-        (p) =>
-          p.status
-            ?.toLowerCase()
-            .includes(
-              "completed"
-            )
-      ).length;
+   const completed =
+  projects.filter(
+    (p) =>
+      groupStatus(
+        p.status
+      ) === "Completed"
+  ).length;
 
-    const ongoing =
-      projects.filter(
-        (p) =>
-          p.status
-            ?.toLowerCase()
-            .includes(
-              "ongoing"
-            )
-      ).length;
+const ongoing =
+  projects.filter(
+    (p) =>
+      groupStatus(
+        p.status
+      ) === "Ongoing"
+  ).length;
 
-    const onHold =
-      projects.filter(
-        (p) =>
-          p.status
-            ?.toLowerCase()
-            .includes(
-              "hold"
-            )
-      ).length;
+const onHold =
+  projects.filter(
+    (p) =>
+      groupStatus(
+        p.status
+      ) === "On Hold"
+  ).length;
 
     return (
 

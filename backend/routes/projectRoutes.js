@@ -147,20 +147,28 @@ router.post(
 
     try {
 
-      /* =========================
-         DEACTIVATE OLD BATCH
-      ========================= */
+    /* =========================
+   DEACTIVATE ONLY ACTIVE
+   NORMAL PROJECTS
+========================= */
 
-      await Project.updateMany(
+await Project.updateMany(
 
-        { isActiveBatch: true },
+  {
 
-        {
-          $set: {
-            isActiveBatch: false,
-          },
-        }
-      );
+    isActiveBatch: true,
+
+    isCompleted: false,
+
+    isDeleted: false,
+  },
+
+  {
+    $set: {
+      isActiveBatch: false,
+    },
+  }
+);
 
       /* =========================
          CREATE NEW BATCH ID
